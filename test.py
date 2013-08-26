@@ -24,8 +24,13 @@ BLUE = pygame.Color(0, 0, 255)
 mousex, mousey = 0, 0
 timer = 0
 
-def mod_mouse_pos(mouse_x, mouse_y):
-	return mouse_x % PI, mouse_y % PI
+def find_slope(circle, mouse_x, mouse_y):
+	circle_pos = circle.get_pos()
+	#dot_product = circle_pos[0] * mouse_x + circle_pos[1] * mouse_y
+	#mouse_mag = math.hypot(mouse_x, mouse_y)
+	#circle_mag = math.hypot(circle_pos[0], circle_pos[1])
+	#return math.acos(circle_mag * mouse_mag / dot_prodcut)
+	return (mouse_y - circle_pos[1]) / (mouse_x - circle_pos[0])
 
 def dist(p, q):
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
@@ -59,7 +64,7 @@ def group_group_collide(group1, group2):
     return total_collisions
 
 def angle_to_vector(ang):
-    return [math.cos(ang[0]), math.sin(ang[1])]
+    return [math.cos(ang), math.sin(ang)]
 
 def spawn_enemy():
 	if len(enemy_array) < 10:
@@ -81,7 +86,7 @@ class Circle:
 		self.rad = raidus
 		self.fill = filled_in
 		self.life = life
-		self.angle = []
+		self.angle = 0
 		self.ani = animate
 
 	def draw(self, window):
@@ -126,8 +131,7 @@ class Circle:
 		return remove
 
 	def shoot(self):
-		test = angle_to_vector(self.angle)
-		bullet_pos = [self.pos[0] + self.rad[0] * test[0], self.pos[1] + self.rad[1] * test[1]]
+		bullet_pos = [int(self.pos[0] + self.rad * self.angle), int(self.pos[1] + self.rad* self.angle)]
         	bullet_vel = [self.vel[0] + 6, self.vel[1] + 6]
 		bullet_array.append(Circle(WHITE, bullet_pos, bullet_vel, 5, 0, 150))
 	
@@ -148,13 +152,13 @@ while True:
 
 	test.draw(WINDOW)
 	test.update()
+	test.change_angle(find_slope(test, mousex, mousey))
 	process_group(bullet_array, WINDOW)
 	process_group(enemy_array, WINDOW)
 	process_group(explosion_array, WINDOW)
 
 	group_collide(enemy_array, test)
 	group_group_collide(enemy_array, bullet_array)
-	test.change_angle(mod_mouse_pos(mousex, mousey))
 
 	for event in pygame.event.get():
 		if event.type == QUIT:
