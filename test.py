@@ -1,5 +1,6 @@
 #This is a test with pygame to create an object that moves and shoots
 #by Gilberto Rodriguez
+#!/usr/bin/python
 
 import pygame, sys, math, random
 from pygame.locals import *
@@ -11,8 +12,8 @@ LENGTH = 640
 WIDTH = 480
 DIM = [LENGTH, WIDTH]
 WINDOW = pygame.display.set_mode((LENGTH, WIDTH))
-
 PI = 3.1415926535
+FONT = pygame.font.Font(None, 30)
 
 pygame.display.set_caption("This is a test")
 
@@ -133,8 +134,8 @@ class Circle:
 	def shoot(self):
 		test = angle_to_vector(self.get_angle())
 		bullet_pos = [int(self.pos[0] + self.rad * test[0]), int(self.pos[1] + self.rad* test[1])]
-        	bullet_vel = [int(self.vel[0] + 6 * test[0]), int(self.vel[1] + 6 * test[1])]
-		bullet_array.append(Circle(WHITE, bullet_pos, bullet_vel, 5, 0, 150))
+        	bullet_vel = [int(6 * test[0]), int(6 * test[1])]
+		bullet_array.append(Circle(BLUE, bullet_pos, bullet_vel, 5, 0, 150))
 	
 	def collide(self, other_object):
 		distance = dist(self.get_pos(), other_object.get_pos())
@@ -143,23 +144,58 @@ class Circle:
 		else:
 			return False
 
-test = Circle(WHITE, [LENGTH/2, WIDTH/2], [0, 0], 20, 0)
+class Text:
+	def __init__(self, label, pos, color, string, number = 0):
+		self.label = label
+		self.pos = pos
+		self.color = color
+		self.string = string
+		self.number = number
+	
+	def change_number(self, new_number):
+		if self.string == False:
+			self.number = new_number
+
+	def get_number(self):
+		if self.string == False:
+			return self.number
+
+	def update(self, font, screen):
+		if self.string == False:
+			to_display = font.render(self.label + str(self.number), 1, self.color)
+		else:
+			to_display = font.render(self.label, 1, self.color)
+		screen.blit(to_display, self.pos)
+
+test = Circle(WHITE, [LENGTH / 2, WIDTH / 2], [0, 0], 20, 0)
+#border = Circle(WHITE, [LENGTH / 2, WIDTH / 2], [0, 0], test.get_radius() + 90, 1)
 bullet_array = []
 enemy_array = []
 explosion_array = []
+
+life_text = Text("Life: ", [550, 450], WHITE, False, 100)
+score_text = Text("Score: ", [10, 450], WHITE, False, 0)
 
 while True:
 	WINDOW.fill(BLACK)
 
 	test.draw(WINDOW)
+	#border.draw(WINDOW)
 	test.update()
+	life_text.update(FONT, WINDOW)
+	score_text.update(FONT, WINDOW)
 	test.change_angle(find_angle(test, mousex, mousey))
 	process_group(bullet_array, WINDOW)
 	process_group(enemy_array, WINDOW)
 	process_group(explosion_array, WINDOW)
 
-	group_collide(enemy_array, test)
-	group_group_collide(enemy_array, bullet_array)
+	collisions = life_text.get_number() - 10 * group_collide(enemy_array, test)
+	if collisions <= 0:
+		life_text.change_number(0)
+	else:
+		life_text.change_number(collisions)
+
+	score_text.change_number(score_text.get_number() + 100 * group_group_collide(enemy_array, bullet_array))
 
 	for event in pygame.event.get():
 		if event.type == QUIT:
@@ -167,6 +203,8 @@ while True:
 			sys.exit()
 		elif event.type == MOUSEMOTION:
 			mousex, mousey = event.pos
+		elif event.type == MOUSEBUTTONDOWN:
+			test.shoot()
 		elif event.type == KEYDOWN:
 			if event.key == K_LEFT or event.key == K_a:
 				test.move_hor(-3)
