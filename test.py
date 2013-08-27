@@ -24,13 +24,10 @@ BLUE = pygame.Color(0, 0, 255)
 mousex, mousey = 0, 0
 timer = 0
 
-def find_slope(circle, mouse_x, mouse_y):
+def find_angle(circle, mouse_x, mouse_y):
 	circle_pos = circle.get_pos()
-	#dot_product = circle_pos[0] * mouse_x + circle_pos[1] * mouse_y
-	#mouse_mag = math.hypot(mouse_x, mouse_y)
-	#circle_mag = math.hypot(circle_pos[0], circle_pos[1])
-	#return math.acos(circle_mag * mouse_mag / dot_prodcut)
-	return (mouse_y - circle_pos[1]) / (mouse_x - circle_pos[0])
+	result = math.atan2((mouse_y - circle_pos[1]) /  (mouse_x - circle_pos[0]))
+	return result
 
 def dist(p, q):
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
@@ -119,6 +116,9 @@ class Circle:
 
 	def get_radius(self):
 		return self.rad
+	
+	def get_angle(self):
+		return self.angle
 
 	def update(self):
 		remove = False
@@ -131,8 +131,9 @@ class Circle:
 		return remove
 
 	def shoot(self):
-		bullet_pos = [int(self.pos[0] + self.rad * self.angle), int(self.pos[1] + self.rad* self.angle)]
-        	bullet_vel = [self.vel[0] + 6, self.vel[1] + 6]
+		test = angle_to_vector(self.get_angle())
+		bullet_pos = [int(self.pos[0] + self.rad * test[0]), int(self.pos[1] + self.rad* test[0])]
+        	bullet_vel = [int(self.vel[0] + 6 * test[0]), int(self.vel[1] + 6 * test[1])]
 		bullet_array.append(Circle(WHITE, bullet_pos, bullet_vel, 5, 0, 150))
 	
 	def collide(self, other_object):
@@ -152,7 +153,7 @@ while True:
 
 	test.draw(WINDOW)
 	test.update()
-	test.change_angle(find_slope(test, mousex, mousey))
+	test.change_angle(find_angle(test, mousex, mousey))
 	process_group(bullet_array, WINDOW)
 	process_group(enemy_array, WINDOW)
 	process_group(explosion_array, WINDOW)
