@@ -26,7 +26,7 @@ timer = 0
 
 def find_angle(circle, mouse_x, mouse_y):
 	circle_pos = circle.get_pos()
-	result = math.atan2((mouse_y - circle_pos[1]) /  (mouse_x - circle_pos[0]))
+	result = math.atan2((mouse_y - circle_pos[1]),  (mouse_x - circle_pos[0]))
 	return result
 
 def dist(p, q):
@@ -132,7 +132,7 @@ class Circle:
 
 	def shoot(self):
 		test = angle_to_vector(self.get_angle())
-		bullet_pos = [int(self.pos[0] + self.rad * test[0]), int(self.pos[1] + self.rad* test[0])]
+		bullet_pos = [int(self.pos[0] + self.rad * test[0]), int(self.pos[1] + self.rad* test[1])]
         	bullet_vel = [int(self.vel[0] + 6 * test[0]), int(self.vel[1] + 6 * test[1])]
 		bullet_array.append(Circle(WHITE, bullet_pos, bullet_vel, 5, 0, 150))
 	
