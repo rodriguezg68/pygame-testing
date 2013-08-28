@@ -256,8 +256,6 @@ while True:
 				test.move_vert(-3)
 			elif event.key == K_DOWN or event.key == K_s:
 				test.move_vert(3)
-			elif event.key == K_SPACE:
-				test.shoot()
 		elif event.type == KEYUP:
 			if event.key == K_LEFT or event.key == K_RIGHT or event.key == K_a or event.key == K_d:
 				test.move_hor(0)
