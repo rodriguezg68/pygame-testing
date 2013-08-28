@@ -65,6 +65,7 @@ def angle_to_vector(ang):
     return [math.cos(ang), math.sin(ang)]
 
 def spawn_enemy():
+	random_array = [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]
 	if len(enemy_array) < 10:
 		rand_pos = [0, 0]
 		rand_vel = [0, 0]
@@ -73,7 +74,7 @@ def spawn_enemy():
 				rand_pos[index] = random.randrange(0, DIM[index])
 				if abs(rand_pos[index] - test.get_pos()[index]) > 20:
 					break 
-			rand_vel[index] = random.randint(-5, 5)
+			rand_vel[index] = random.choice(random_array) + score_text.get_number() / 500
 		enemy_array.append(Circle(RED, rand_pos, rand_vel, 10, 0))
 
 def title_screen(window):
@@ -117,6 +118,9 @@ class Circle:
 
 	def change_radius(self, new_radius):
 		self.rad = new_radius
+	
+	def change_pos(self, new_pos):
+		self.pos = new_pos
 	
 	def get_pos(self):
 		return self.pos
@@ -229,6 +233,12 @@ while True:
 		if collisions <= 0:
 			life_text.change_number(0)
 			in_play = False
+			life_text.change_number(100)
+			score_text.change_number(0)
+			enemy_array = []
+			bullet_array = []
+			explosion_array = []
+			test.change_pos([DIM[0] / 2, DIM[1] / 2])
 		else:
 			life_text.change_number(collisions)
 
