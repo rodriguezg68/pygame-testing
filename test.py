@@ -148,7 +148,7 @@ class Circle:
 		test = angle_to_vector(self.get_angle())
 		bullet_pos = [int(self.pos[0] + self.rad * test[0]), int(self.pos[1] + self.rad* test[1])]
         	bullet_vel = [int(6 * test[0]), int(6 * test[1])]
-		bullet_array.append(Circle(BLUE, bullet_pos, bullet_vel, 5, 0, 150))
+		bullet_array.append(Circle(BLUE, bullet_pos, bullet_vel, 5, 0, 200))
 	
 	def collide(self, other_object):
 		distance = dist(self.get_pos(), other_object.get_pos())
@@ -200,7 +200,6 @@ class Text:
 		window.blit(self.font, self.pos)
      
 test = Circle(WHITE, [DIM[0] / 2, DIM[1] / 2], [0, 0], 20, 0)
-#border = Circle(WHITE, [LENGTH / 2, WIDTH / 2], [0, 0], test.get_radius() + 90, 1)
 bullet_array = []
 enemy_array = []
 explosion_array = []
@@ -220,7 +219,6 @@ while True:
 	else:
 
 		test.draw(WINDOW)
-		#border.draw(WINDOW)
 		test.update()
 		life_text.draw(WINDOW)
 		score_text.draw(WINDOW)
