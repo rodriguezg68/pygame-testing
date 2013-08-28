@@ -13,7 +13,6 @@ WIDTH = 480
 DIM = [LENGTH, WIDTH]
 WINDOW = pygame.display.set_mode((LENGTH, WIDTH))
 PI = 3.1415926535
-FONT = pygame.font.Font(None, 30)
 
 pygame.display.set_caption("This is a test")
 
@@ -24,6 +23,7 @@ GREEN = pygame.Color(0, 255, 0)
 BLUE = pygame.Color(0, 0, 255)
 mousex, mousey = 0, 0
 timer = 0
+in_play = False
 
 def find_angle(circle, mouse_x, mouse_y):
 	circle_pos = circle.get_pos()
@@ -75,6 +75,15 @@ def spawn_enemy():
 					break 
 			rand_vel[index] = random.randint(-5, 5)
 		enemy_array.append(Circle(RED, rand_pos, rand_vel, 10, 0))
+
+def title_screen(window):
+	title_text.draw(window)
+	if play_text.rect.collidepoint(pygame.mouse.get_pos()):
+       		play_text.hovered = True
+       	else:
+       	    	play_text.hovered = False
+	play_text.draw(window)
+
         
 class Circle:
 	def __init__(self, color, position, velocity, raidus, filled_in, life = 0, animate = False):
@@ -145,12 +154,17 @@ class Circle:
 			return False
 
 class Text:
-	def __init__(self, label, pos, color, string, number = 0):
+
+	hovered = False
+	
+	def __init__(self, label, pos, color, string, size, number = 0):
 		self.label = label
 		self.pos = pos
 		self.color = color
 		self.string = string
+		self.size = size
 		self.number = number
+		self.set_rect()
 	
 	def change_number(self, new_number):
 		if self.string == False:
@@ -160,51 +174,79 @@ class Text:
 		if self.string == False:
 			return self.number
 
-	def update(self, font, screen):
-		if self.string == False:
-			to_display = font.render(self.label + str(self.number), 1, self.color)
+	def get_color(self):
+		if self.hovered:
+			return RED
 		else:
-			to_display = font.render(self.label, 1, self.color)
-		screen.blit(to_display, self.pos)
+			return self.color
 
-test = Circle(WHITE, [LENGTH / 2, WIDTH / 2], [0, 0], 20, 0)
+	def set_font(self):
+		font = pygame.font.Font(None, self.size)
+		if self.string == False:
+			self.font = font.render(self.label + str(self.number), True, self.get_color())
+		else:
+			self.font = font.render(self.label, True, self.get_color())
+	def set_rect(self):
+		self.set_font()
+		self.rect = self.font.get_rect()
+		self.rect.topleft = self.pos
+
+	def draw(self, window):	
+		self.set_font()	
+		window.blit(self.font, self.pos)
+     
+test = Circle(WHITE, [DIM[0] / 2, DIM[1] / 2], [0, 0], 20, 0)
 #border = Circle(WHITE, [LENGTH / 2, WIDTH / 2], [0, 0], test.get_radius() + 90, 1)
 bullet_array = []
 enemy_array = []
 explosion_array = []
 
-life_text = Text("Life: ", [550, 450], WHITE, False, 100)
-score_text = Text("Score: ", [10, 450], WHITE, False, 0)
+life_text = Text("Life: ", [550, 450], WHITE, False, 30, 100)
+score_text = Text("Score: ", [10, 450], WHITE, False, 30, 0)
+title_text = Text("TEST", [250, 200], WHITE, True, 72)
+play_text = Text("Play", [287, 250], WHITE, True, 40)
 
 while True:
 	WINDOW.fill(BLACK)
+	pygame.event.pump()
 
-	test.draw(WINDOW)
-	#border.draw(WINDOW)
-	test.update()
-	life_text.update(FONT, WINDOW)
-	score_text.update(FONT, WINDOW)
-	test.change_angle(find_angle(test, mousex, mousey))
-	process_group(bullet_array, WINDOW)
-	process_group(enemy_array, WINDOW)
-	process_group(explosion_array, WINDOW)
-
-	collisions = life_text.get_number() - 10 * group_collide(enemy_array, test)
-	if collisions <= 0:
-		life_text.change_number(0)
+	if in_play == False:
+		title_screen(WINDOW)
+	
 	else:
-		life_text.change_number(collisions)
 
-	score_text.change_number(score_text.get_number() + 100 * group_group_collide(enemy_array, bullet_array))
+		test.draw(WINDOW)
+		#border.draw(WINDOW)
+		test.update()
+		life_text.draw(WINDOW)
+		score_text.draw(WINDOW)
+		test.change_angle(find_angle(test, mousex, mousey))
+		process_group(bullet_array, WINDOW)
+		process_group(enemy_array, WINDOW)
+		process_group(explosion_array, WINDOW)
+
+		collisions = life_text.get_number() - 10 * group_collide(enemy_array, test)
+		if collisions <= 0:
+			life_text.change_number(0)
+			in_play = False
+		else:
+			life_text.change_number(collisions)
+
+		score_text.change_number(score_text.get_number() + 100 * group_group_collide(enemy_array, bullet_array))	
 
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
 			sys.exit()
 		elif event.type == MOUSEMOTION:
-			mousex, mousey = event.pos
+			if in_play:
+				mousex, mousey = event.pos
 		elif event.type == MOUSEBUTTONDOWN:
-			test.shoot()
+			if in_play:
+				test.shoot()
+			else:
+				if play_text.rect.collidepoint(event.pos):
+					in_play = True
 		elif event.type == KEYDOWN:
 			if event.key == K_LEFT or event.key == K_a:
 				test.move_hor(-3)
