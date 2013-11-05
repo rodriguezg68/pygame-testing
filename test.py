@@ -25,24 +25,29 @@ mousex, mousey = 0, 0
 timer = 0
 in_play = False
 
+#finds the angle from circle to mouse pointer
 def find_angle(circle, mouse_x, mouse_y):
 	circle_pos = circle.get_pos()
 	result = math.atan2((mouse_y - circle_pos[1]),  (mouse_x - circle_pos[0]))
 	return result
 
+#find the distance between two points
 def dist(p, q):
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
+#removes a group of elements
 def kill_group(group):
     for item in list(group):
         group.remove(item)
     
+#draws and updates a group of elements
 def process_group(group, canvas):
     for item in list(group):
         item.draw(canvas)
         if item.update():
             group.remove(item)
 
+#detects collisions between objects in a group and another object
 def group_collide(group, other_object):
     collisions = 0
     for item in list(group):
@@ -52,6 +57,7 @@ def group_collide(group, other_object):
         	group.remove(item)
     return collisions
 
+#detects collisions between objects in different groups
 def group_group_collide(group1, group2):
     total_collisions = 0
     for item in list(group1):
@@ -61,9 +67,12 @@ def group_group_collide(group1, group2):
             group1.remove(item)
     return total_collisions
 
+#changes an angle into vector components
 def angle_to_vector(ang):
     return [math.cos(ang), math.sin(ang)]
 
+#allows for enemies for upto 10 enemies with random directions and 
+#velocity to spawn within a certian radius of the player
 def spawn_enemy():
 	random_array = [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]
 	if len(enemy_array) < 10:
@@ -77,6 +86,7 @@ def spawn_enemy():
 			rand_vel[index] = random.choice(random_array) + score_text.get_number() / 500
 		enemy_array.append(Circle(RED, rand_pos, rand_vel, 10, 0))
 
+#code for the basic title screen
 def title_screen(window):
 	title_text.draw(window)
 	if play_text.rect.collidepoint(pygame.mouse.get_pos()):
@@ -84,6 +94,7 @@ def title_screen(window):
        	else:
        	    	play_text.hovered = False
 	play_text.draw(window)
+	score_text.draw(window)
 
         
 class Circle:
@@ -232,7 +243,6 @@ while True:
 			life_text.change_number(0)
 			in_play = False
 			life_text.change_number(100)
-			score_text.change_number(0)
 			enemy_array = []
 			bullet_array = []
 			explosion_array = []
@@ -255,6 +265,7 @@ while True:
 			else:
 				if play_text.rect.collidepoint(event.pos):
 					in_play = True
+					score_text.change_number(0)
 		elif event.type == KEYDOWN:
 			if event.key == K_LEFT or event.key == K_a:
 				test.move_hor(-3)
